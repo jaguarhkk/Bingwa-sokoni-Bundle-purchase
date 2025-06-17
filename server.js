@@ -8,8 +8,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// ✅ Allow only one Netlify domain
 app.use(cors({
-  origin: 'https://s-8f645d.netlify.app'
+  origin: 'https://68512e7eb907eae1d154e68b--gleeful-taffy-6e6df0.netlify.app'
 }));
 
 app.use(express.json());
