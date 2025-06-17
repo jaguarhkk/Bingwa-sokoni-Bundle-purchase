@@ -8,12 +8,12 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// âœ… Allow CORS for your Netlify domain
-app.use(cors({
-  origin: 'https://s-8f645d.netlify.app'
-}));
-
+app.use(cors({ origin: 'https://s-8f645d.netlify.app' }));
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.send('PayHero Backend is running');
+});
 
 const credentials = `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`;
 const encodedCredentials = Buffer.from(credentials).toString('base64');
@@ -28,13 +28,9 @@ const payHero = new PayHero({
   pesapalIpnId: ''
 });
 
-// STK push endpoint
 app.post('/stk-push', async (req, res) => {
   const { phone } = req.body;
-
-  if (!phone) {
-    return res.status(400).json({ error: 'Phone number is required' });
-  }
+  if (!phone) return res.status(400).json({ error: 'Phone number is required' });
 
   const paymentDetails = {
     amount: 129,
@@ -54,7 +50,6 @@ app.post('/stk-push', async (req, res) => {
   }
 });
 
-// Callback endpoint
 app.post('/callback', (req, res) => {
   console.log('Callback received:', req.body);
   res.status(200).send('Callback received');
