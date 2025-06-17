@@ -9,9 +9,9 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-const credentials = \`\${process.env.API_USERNAME}:\${process.env.API_PASSWORD}\`;
+const credentials = `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`;
 const encodedCredentials = Buffer.from(credentials).toString('base64');
-const authToken = \`Basic \${encodedCredentials}\`;
+const authToken = `Basic ${encodedCredentials}`;
 
 const payHero = new PayHero({
   Authorization: authToken,
@@ -36,7 +36,7 @@ app.post('/stk-push', async (req, res) => {
     channel_id: parseInt(process.env.CHANNEL_ID),
     provider: process.env.PROVIDER,
     external_reference: 'WEB-ORDER-129',
-    callback_url: 'https://your-backend.com/callback'
+    callback_url: 'https://bingwa-sokoni-bundle-purchase.onrender.com/callback'
   };
 
   try {
@@ -55,5 +55,5 @@ app.post('/callback', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(\`Server is running on port \${port}\`);
+  console.log(`Server is running on port ${port}`);
 });
