@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // ✅ Allow only one Netlify domain
 app.use(cors({
-  origin: 'https://bundlepurchase.netlify.app/'
+  origin: 'https://68512e7eb907eae1d154e68b--gleeful-taffy-6e6df0.netlify.app'
 }));
 
 app.use(express.json());
@@ -36,12 +36,12 @@ app.post('/stk-push', async (req, res) => {
   }
 
   const paymentDetails = {
-    amount: 10,
+    amount: 100,
     phone_number: phone,
     channel_id: parseInt(process.env.CHANNEL_ID),
     provider: process.env.PROVIDER,
     network_code: '63902',
-    external_reference: 'WEB-ORDER-10',
+    external_reference: 'WEB-ORDER-100',
     callback_url: 'https://bingwa-sokoni-bundle-purchase.onrender.com/callback'
   };
 
