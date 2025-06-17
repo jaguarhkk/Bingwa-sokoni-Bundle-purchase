@@ -12,7 +12,6 @@ const port = process.env.PORT || 3000;
 app.use(cors({
   origin: 'https://6851783d5954f23f50514b0e--frolicking-toffee-34afe6.netlify.app'
 }));
-
 app.use(express.json());
 
 const credentials = `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`;
@@ -29,10 +28,14 @@ const payHero = new PayHero({
 });
 
 app.post('/stk-push', async (req, res) => {
-  const { phone } = req.body;
+  const { phone, amount } = req.body;
 
   if (!phone) {
     return res.status(400).json({ error: 'Phone number is required' });
+  }
+
+  if (!amount || isNaN(amount) || parseFloat(amount) < 1) {
+    return res.status(400).json({ error: 'Valid amount is required' });
   }
 
   if (!process.env.CHANNEL_ID || !process.env.PROVIDER) {
@@ -40,12 +43,12 @@ app.post('/stk-push', async (req, res) => {
   }
 
   const paymentDetails = {
-    amount: 129,
+    amount: parseFloat(amount),
     phone_number: phone,
     channel_id: parseInt(process.env.CHANNEL_ID),
     provider: process.env.PROVIDER,
     network_code: '63902',
-    external_reference: 'WEB-ORDER-129',
+    external_reference: `WEB-ORDER-${Date.now()}`,
     callback_url: 'https://bingwa-sokoni-bundle-purchase.onrender.com/callback'
   };
 
