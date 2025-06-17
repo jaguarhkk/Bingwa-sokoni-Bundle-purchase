@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // ✅ Allow your current Netlify domain
 app.use(cors({
-  origin: 'https://silver-queijadas-1bbdd7.netlify.app'
+  origin: 'https://bingwakenyambs.netlify.app'
 }));
 
 app.use(express.json());
