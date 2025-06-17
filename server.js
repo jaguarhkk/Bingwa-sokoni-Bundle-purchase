@@ -8,14 +8,11 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// âœ… Open CORS to all origins for testing
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: 'https://s-8f645d.netlify.app'
+}));
 
-// Basic health check route
-app.get('/', (req, res) => {
-  res.send('âœ… PayHero backend is live');
-});
+app.use(express.json());
 
 const credentials = `${process.env.API_USERNAME}:${process.env.API_PASSWORD}`;
 const encodedCredentials = Buffer.from(credentials).toString('base64');
@@ -30,10 +27,8 @@ const payHero = new PayHero({
   pesapalIpnId: ''
 });
 
-// STK push endpoint with logging
 app.post('/stk-push', async (req, res) => {
   const { phone } = req.body;
-  console.log('ðŸ“ž STK Push called with phone:', phone); // âœ… log input
 
   if (!phone) {
     return res.status(400).json({ error: 'Phone number is required' });
@@ -44,6 +39,7 @@ app.post('/stk-push', async (req, res) => {
     phone_number: phone,
     channel_id: parseInt(process.env.CHANNEL_ID),
     provider: process.env.PROVIDER,
+    network_code: '63902',
     external_reference: 'WEB-ORDER-129',
     callback_url: 'https://bingwa-sokoni-bundle-purchase.onrender.com/callback'
   };
@@ -52,17 +48,16 @@ app.post('/stk-push', async (req, res) => {
     const response = await payHero.makeStkPush(paymentDetails);
     res.json(response);
   } catch (err) {
-    console.error('âŒ Error in STK Push:', err.message);
+    console.error('Error in STK Push:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Callback route
 app.post('/callback', (req, res) => {
-  console.log('ðŸ” Callback received:', req.body);
+  console.log('Callback received:', req.body);
   res.status(200).send('Callback received');
 });
 
 app.listen(port, () => {
-  console.log(`ðŸš€ Server is running on port ${port}`);
+  console.log(`Server is running on port ${port}`);
 });
