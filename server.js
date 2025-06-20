@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://phonestore254.netlify.app'
+  origin: 'https://bingwasokonibundles.netlify.app/'
 }));
 app.use(express.json());
 
