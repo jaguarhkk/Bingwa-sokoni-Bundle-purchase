@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://stellular-croquembouche-fb2914.netlify.app'
+  origin: 'https://soft-ganache-98bf6d.netlify.app'
 }));
 app.use(express.json());
 
