@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://imarikaloanke.netlify.app/imarika%20bundles.html'
+  origin: 'https://imarikaloanke.netlify.app'
 }));
 app.use(express.json());
 
