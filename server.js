@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://earnest-longma-454eb5.netlify.app'
+  origin: 'https://radiant-syrniki-d816ff.netlify.app'
 }));
 app.use(express.json());
 
