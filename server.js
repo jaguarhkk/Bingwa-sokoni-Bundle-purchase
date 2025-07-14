@@ -55,11 +55,15 @@ app.post('/stk-push', async (req, res) => {
     const response = await payHero.makeStkPush(paymentDetails);
     res.json(response);
   } catch (err) {
-    console.error('❌ Error in STK Push:', {
-      message: err.message,
-      responseData: err.response?.data,
-      stack: err.stack
-    });
+    console.error('❌ STK Push failed:');
+console.error('➡️ Error Message:', err.message);
+if (err.response) {
+  console.error('➡️ Response Data:', JSON.stringify(err.response.data, null, 2));
+  console.error('➡️ Status Code:', err.response.status);
+  console.error('➡️ Headers:', JSON.stringify(err.response.headers, null, 2));
+} else {
+  console.error('➡️ Full Error:', err);
+}
 
     res.status(500).json({
       error: 'STK Push failed',
