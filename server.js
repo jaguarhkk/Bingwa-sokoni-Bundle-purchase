@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -10,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://imarikacashloan.netlify.app/'
+  origin: 'https://melodious-clafoutis-b3aa1e.netlify.app'
 }));
 app.use(express.json());
 
@@ -38,22 +37,25 @@ app.post('/stk-push', async (req, res) => {
     return res.status(400).json({ error: 'Valid amount is required' });
   }
 
+  if (!process.env.CHANNEL_ID || !process.env.PROVIDER) {
+    return res.status(500).json({ error: 'Server misconfiguration: Missing CHANNEL_ID or PROVIDER' });
+  }
+
   const paymentDetails = {
     amount: parseFloat(amount),
     phone_number: phone,
-    channel_id: 2851, // âœ… Hardcoded: KCB Paybill channel ID
-    provider: 'm-pesa', // âœ… Hardcoded: required by PayHero
+    channel_id: parseInt(process.env.CHANNEL_ID),
+    provider: process.env.PROVIDER,
+    network_code: '63902',
     external_reference: `WEB-ORDER-${Date.now()}`,
-    customer_name: 'Web User',
     callback_url: 'https://bingwa-sokoni-bundle-purchase.onrender.com/callback'
   };
 
   try {
-    console.log('ðŸ“¤ Sending STK Push:', paymentDetails);
     const response = await payHero.makeStkPush(paymentDetails);
     res.json(response);
   } catch (err) {
-    console.error('âŒ Error in STK Push:', {
+    console.error('❌ Error in STK Push:', {
       message: err.message,
       responseData: err.response?.data,
       stack: err.stack
@@ -68,10 +70,10 @@ app.post('/stk-push', async (req, res) => {
 });
 
 app.post('/callback', (req, res) => {
-  console.log('âœ… Callback received:', req.body);
+  console.log('✅ Callback received:', req.body);
   res.status(200).send('Callback received');
 });
 
 app.listen(port, () => {
-  console.log(`ðŸš€ Server is running on port ${port}`);
+  console.log(`🚀 Server is running on port ${port}`);
 });
