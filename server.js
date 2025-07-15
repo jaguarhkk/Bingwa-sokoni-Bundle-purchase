@@ -11,7 +11,7 @@ const port = process.env.PORT || 3000;
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? 'https://melodious-clafoutis-b3aa1e.netlify.app'
+    ? 'https://super-centaur-1329ef.netlify.app'
     : '*'
 }));
 app.use(express.json());
