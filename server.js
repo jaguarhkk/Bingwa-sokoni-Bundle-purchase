@@ -26,8 +26,14 @@ const payHero = new PayHero({
   pesapalIpnId: process.env.PESAPAL_IPN_ID
 });
 
+// Health check route
+app.get('/', (req, res) => {
+  res.send('âœ… STK Server is running');
+});
+
 app.post('/stk-push', async (req, res) => {
   const { phone, amount } = req.body;
+  console.log('ðŸ“¥ STK Request Received:', req.body);
 
   if (!phone) {
     return res.status(400).json({ error: 'Phone number is required' });
@@ -54,9 +60,10 @@ app.post('/stk-push', async (req, res) => {
     const response = await payHero.makeStkPush(paymentDetails);
     res.json(response);
   } catch (err) {
-    console.error('❌ Error in STK Push:', {
+    console.error('âŒ Error in STK Push:', {
       message: err.message,
       responseData: err.response?.data,
+      config: err.config,
       stack: err.stack
     });
 
@@ -69,10 +76,10 @@ app.post('/stk-push', async (req, res) => {
 });
 
 app.post('/callback', (req, res) => {
-  console.log('✅ Callback received:', req.body);
+  console.log('âœ… Callback received:', req.body);
   res.status(200).send('Callback received');
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Server is running on port ${port}`);
+  console.log(`ðŸš€ Server is running on port ${port}`);
 });
