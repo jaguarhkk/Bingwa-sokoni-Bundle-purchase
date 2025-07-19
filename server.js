@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: 'https://ubiquitous-pegasus-14c28a.netlify.app'
+  origin: 'https://aesthetic-mandazi-ff9e00.netlify.app'
 }));
 app.use(express.json());
 
