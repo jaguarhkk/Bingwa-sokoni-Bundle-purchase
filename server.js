@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
   res.send('✅ PayHero STK Server is running');
 });
 
-// STK Push endpoint
+// STK Push endpoint (channel_id hardcoded to 2200)
 app.post('/stk-push', async (req, res) => {
   const { phone, amount } = req.body;
   console.log('📥 STK Request Received:', req.body);
@@ -43,32 +43,29 @@ app.post('/stk-push', async (req, res) => {
     return res.status(400).json({ error: 'Valid amount is required' });
   }
 
-  if (!process.env.CHANNEL_ID || !process.env.PROVIDER) {
-    return res.status(500).json({ error: 'Server misconfiguration: Missing CHANNEL_ID or PROVIDER' });
+  if (!process.env.PROVIDER) {
+    return res.status(500).json({ error: 'Server misconfiguration: Missing PROVIDER' });
   }
 
-  // Construct STK push payload
   const paymentDetails = {
     amount: parseFloat(amount),
     phone_number: phone,
-    channel_id: parseInt(process.env.CHANNEL_ID),
+    channel_id: 2200, // Hardcoded
     provider: process.env.PROVIDER,
-    external_reference: "INV-009", // You might want to make this dynamic
+    external_reference: `INV-${Date.now()}`,
     callback_url: 'https://bingwa-sokoni-bundle-purchase.onrender.com/callback'
   };
 
   try {
     const response = await payHero.makeStkPush(paymentDetails);
-    console.log('✅ PayHero STK Response:', response);
+    console.log('✅ STK Push Success:', response);
     res.json(response);
   } catch (err) {
     console.error('❌ STK Push Failed:', {
       message: err.message,
       status: err.response?.status,
-      response: err.response?.data,
-      headers: err.response?.headers,
-      config: err.config,
-      stack: err.stack
+      data: err.response?.data,
+      headers: err.response?.headers
     });
 
     res.status(500).json({
@@ -85,7 +82,7 @@ app.post('/callback', (req, res) => {
   res.status(200).send('Callback received');
 });
 
-// Start the server
+// Start server
 app.listen(port, () => {
   console.log(`🚀 Server is running on port ${port}`);
 });
