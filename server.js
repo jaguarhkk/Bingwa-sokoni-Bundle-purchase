@@ -46,10 +46,9 @@ app.post('/stk-push', async (req, res) => {
   const phone = req.body.phone;
   const amount = 100;
 
-  if (!phone || !/^2547\d{8}$/.test(phone)) {
-    return res.status(400).json({ message: 'Invalid phone number' });
+  if (!/^07\d{8}$/.test(phone) && !/^2547\d{8}$/.test(phone)) {
+    return res.status(400).json({ message: 'Invalid Kenyan phone number format. Use 07XXXXXXXX or 2547XXXXXXXX' });
   }
-
   try {
     const token = await getAccessToken();
 
