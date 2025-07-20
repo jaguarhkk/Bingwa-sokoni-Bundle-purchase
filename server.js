@@ -1,82 +1,97 @@
-require('dotenv').config();
 const express = require('express');
-const axios = require('axios');
-const crypto = require('crypto');
-const path = require('path');
 const cors = require('cors');
+const axios = require('axios');
+require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'https://serene-tapioca-05764a.netlify.app'
+  origin: 'https://your-netlify-site.netlify.app' // Replace with your actual Netlify domain
 }));
-
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-const CONSUMER_KEY = process.env.PESAPAL_CONSUMER_KEY;
-const CONSUMER_SECRET = process.env.PESAPAL_CONSUMER_SECRET;
-const PESAPAL_API_URL = process.env.PESAPAL_API_URL || 'https://cybqa.pesapal.com/pesapalv3/api';
+let accessToken = '';
+let tokenExpiry = 0;
 
-let accessToken = null;
-let tokenExpiry = null;
+const getAccessToken = async () => {
+  if (Date.now() < tokenExpiry && accessToken) {
+    console.log('Using cached access token');
+    return accessToken;
+  }
 
-async function getOAuthToken() {
-  const credentials = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString('base64');
-  const response = await axios.get(`${PESAPAL_API_URL}/Auth/RequestToken`, {
-    headers: { Authorization: `Basic ${credentials}` }
-  });
+  try {
+    const response = await axios.post(
+      'https://pay.pesapal.com/v3/api/Auth/RequestToken',
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${Buffer.from(`${process.env.PESAPAL_KEY}:${process.env.PESAPAL_SECRET}`).toString('base64')}`
+        }
+      }
+    );
 
-  accessToken = response.data.token;
-  tokenExpiry = new Date(Date.now() + 55 * 60 * 1000);
-  console.log('[Pesapal] Access token refreshed');
-  return accessToken;
-}
-
-app.get('/', (req, res) => {
-  res.send('Pesapal STK Push API is running');
-});
+    accessToken = response.data.token;
+    tokenExpiry = Date.now() + (response.data.expires_in * 1000);
+    console.log('✅ Access token retrieved');
+    return accessToken;
+  } catch (error) {
+    console.error('❌ Failed to get access token:', error.response?.data || error.message);
+    throw new Error('Access token fetch failed');
+  }
+};
 
 app.post('/stk-push', async (req, res) => {
+  const phone = req.body.phone;
+  const amount = 100;
+
+  if (!phone || !/^2547\d{8}$/.test(phone)) {
+    return res.status(400).json({ message: 'Invalid phone number' });
+  }
+
   try {
-    const { phone_number } = req.body;
+    const token = await getAccessToken();
 
-    if (!/^2547\d{8}$/.test(phone_number)) {
-      return res.status(400).json({ message: 'Invalid phone number format' });
-    }
-
-    console.log(`[STK PUSH] Phone: ${phone_number} | Amount: 100`);
-
-    if (!accessToken || !tokenExpiry || new Date() > tokenExpiry) {
-      await getOAuthToken();
-    }
-
-    const payload = {
-      id: crypto.randomUUID(),
-      amount: 100,
-      phone_number,
-      currency: "KES",
-      email_address: "test@example.com",
-      callback_url: "https://yourdomain.com/callback",
-      description: "Payment for ViralJet",
-      country: "KEN"
+    const order = {
+      id: `order-${Date.now()}`,
+      currency: 'KES',
+      amount,
+      description: 'Payment for item',
+      callback_url: 'https://webhook.site/your-callback-url', // Optional
+      notification_id: '', // Optional if not using IPN
+      billing_address: {
+        phone_number: phone,
+        email_address: 'demo@example.com',
+        country_code: 'KE',
+        first_name: 'Demo',
+        last_name: 'User',
+        line_1: 'Nairobi',
+        city: 'Nairobi',
+        state: 'Nairobi'
+      }
     };
 
-    const response = await axios.post(`${PESAPAL_API_URL}/Transaction/SubmitOrderRequest`, payload, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+    const response = await axios.post(
+      'https://pay.pesapal.com/v3/api/Transactions/SubmitOrderRequest',
+      order,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       }
-    });
+    );
 
-    console.log('[Pesapal] STK push request sent successfully');
-    res.json(response.data);
+    console.log('✅ STK Push Response:', response.data);
+    res.status(200).json({ message: 'STK push sent', data: response.data });
 
   } catch (error) {
-    console.error('[Pesapal] STK push failed:', error.response?.data || error.message);
+    console.error('❌ STK Push Failed:', error.response?.data || error.message);
     res.status(500).json({ message: 'Failed to initiate STK push' });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
