@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: 'https://your-netlify-site.netlify.app' // Replace with your actual Netlify domain
+  origin: 'https://serene-tapioca-05764a.netlify.app' // Replace with your actual Netlify domain
 }));
 app.use(express.json());
 
