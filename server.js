@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 
 app.use(cors({
-  origin: 'https://your-site.netlify.app'
+  origin: 'https://serene-tapioca-05764a.netlify.app'
 }));
 
 app.use(express.json());
